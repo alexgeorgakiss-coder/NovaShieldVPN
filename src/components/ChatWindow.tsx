@@ -36,9 +36,9 @@ export default function ChatWindow({ messages, loading, onSend }: Props) {
               <SparklesIcon size={28} className="text-brand" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-white mb-2">AI Content Studio</h1>
+              <h1 className="text-xl font-semibold text-white mb-2">STEM Robotics</h1>
               <p className="text-gray-400 text-sm max-w-sm">
-                Παραγωγή SEO άρθρων &amp; Social Media posts για ακαδημία STEM/Ρομποτικής. Πες μου τι θέλεις να δημιουργήσουμε.
+                Παραγωγή SEO άρθρων &amp; Social Media posts για την ακαδημία STEM Robotics. Πες μου τι θέλεις να δημιουργήσουμε.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full">

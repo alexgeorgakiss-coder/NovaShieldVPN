@@ -34,7 +34,7 @@ export default function Sidebar({ sessions, currentChatId, loading, onNewChat, o
       {/* Logo */}
       <div className="flex items-center gap-2 px-4 py-4 border-b border-white/10">
         <BotIcon size={22} className="text-brand" />
-        <span className="font-semibold text-sm tracking-wide">AI Content Studio</span>
+        <span className="font-semibold text-sm tracking-wide">STEM Robotics</span>
       </div>
 
       {/* New Chat */}
