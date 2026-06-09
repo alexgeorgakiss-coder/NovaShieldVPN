@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* Article HTML content rendered from AI */
+.article-content {
+  color: #d1d5db;
+  line-height: 1.75;
+}
+.article-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+.article-content h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.article-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+.article-content p {
+  margin-bottom: 0.85rem;
+}
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+.article-content table th {
+  background: rgba(255,255,255,0.07);
+  color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.article-content table td {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #d1d5db;
+}
+.article-content table tr:hover td {
+  background: rgba(255,255,255,0.03);
+}
+.article-content strong {
+  color: #f3f4f6;
+  font-weight: 600;
+}
+.article-content a {
+  color: #10a37f;
+  text-decoration: underline;
+}
+.article-content .brand-highlight {
+  color: #10a37f;
+  font-weight: 700;
+}
+.article-content .cta-section {
+  background: rgba(16, 163, 127, 0.08);
+  border: 1px solid rgba(16, 163, 127, 0.25);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-top: 1.5rem;
+}
