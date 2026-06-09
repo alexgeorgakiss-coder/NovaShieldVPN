@@ -1,3 +1,5 @@
+export type AIModel = 'gpt-4o' | 'dall-e-3'
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'

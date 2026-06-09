@@ -42,7 +42,7 @@ export default function MessageBubble({ message }: Props) {
   return (
     <div className="flex items-start gap-3 px-4 py-3">
       <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center shrink-0 mt-0.5">
-        <BotIcon size={15} className="text-white" />
+        <BotIcon size={15} className="text-black" />
       </div>
 
       <div className="flex-1 min-w-0 space-y-3">
@@ -92,7 +92,7 @@ export default function MessageBubble({ message }: Props) {
               className="w-full flex items-center justify-between px-4 py-2.5 bg-white/5 hover:bg-white/10 transition-colors text-sm text-gray-300"
             >
               <span className="flex items-center gap-2">
-                <SearchIcon size={14} className="text-purple-400" />
+                <SearchIcon size={14} className="text-gray-300" />
                 SEO Metadata
               </span>
               {seoOpen ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
@@ -124,7 +124,7 @@ export default function MessageBubble({ message }: Props) {
                       {message.seoKeywords.split(',').map((kw) => (
                         <span
                           key={kw}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-gray-200 text-xs"
                         >
                           <TagIcon size={9} />
                           {kw.trim()}

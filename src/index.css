@@ -66,16 +66,16 @@
   font-weight: 600;
 }
 .article-content a {
-  color: #10a37f;
+  color: #ffffff;
   text-decoration: underline;
 }
 .article-content .brand-highlight {
-  color: #10a37f;
+  color: #ffffff;
   font-weight: 700;
 }
 .article-content .cta-section {
-  background: rgba(16, 163, 127, 0.08);
-  border: 1px solid rgba(16, 163, 127, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
   margin-top: 1.5rem;

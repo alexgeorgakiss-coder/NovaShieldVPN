@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { BotIcon, SparklesIcon } from 'lucide-react'
-import type { Message } from '../types'
+import type { AIModel, Message } from '../types'
 import MessageBubble from './MessageBubble'
 import MessageInput from './MessageInput'
 
 interface Props {
   messages: Message[]
   loading: boolean
+  model: AIModel
+  onModelChange: (model: AIModel) => void
   onSend: (text: string) => void
 }
 
@@ -17,7 +19,7 @@ const SUGGESTIONS = [
   'Δημιούργησε εβδομαδιαίο πρόγραμμα posts για Instagram',
 ]
 
-export default function ChatWindow({ messages, loading, onSend }: Props) {
+export default function ChatWindow({ messages, loading, model, onModelChange, onSend }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function ChatWindow({ messages, loading, onSend }: Props) {
             {loading && (
               <div className="flex items-start gap-3 px-4 py-3">
                 <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center shrink-0">
-                  <BotIcon size={15} className="text-white" />
+                  <BotIcon size={15} className="text-black" />
                 </div>
                 <div className="flex items-center gap-1.5 pt-2">
                   <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0ms]" />
@@ -76,7 +78,7 @@ export default function ChatWindow({ messages, loading, onSend }: Props) {
       </div>
 
       {/* Input */}
-      <MessageInput onSend={onSend} loading={loading} />
+      <MessageInput onSend={onSend} loading={loading} model={model} onModelChange={onModelChange} />
     </div>
   )
 }

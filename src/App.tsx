@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import type { Message, ChatSession } from './types'
+import type { AIModel, Message, ChatSession } from './types'
 import { sendToN8N } from './services/n8n'
 import { fetchAllSessions, fetchMessagesForChat } from './services/airtable'
 import Sidebar from './components/Sidebar'
@@ -16,6 +16,7 @@ export default function App() {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [model, setModel] = useState<AIModel>('gpt-4o')
 
   // Load sidebar sessions on mount
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function App() {
       setSending(true)
 
       try {
-        const data = await sendToN8N(text, currentChatId)
+        const data = await sendToN8N(text, currentChatId, model)
 
         const aiText = data.message ?? data.output ?? 'Έγινε! Δες τα αποτελέσματα παρακάτω.'
         const aiMsg: Message = {
@@ -86,7 +87,7 @@ export default function App() {
         setSending(false)
       }
     },
-    [currentChatId]
+    [currentChatId, model]
   )
 
   return (
@@ -99,7 +100,13 @@ export default function App() {
         onSelectChat={handleSelectChat}
       />
       <main className="flex-1 min-w-0 flex flex-col">
-        <ChatWindow messages={messages} loading={sending} onSend={handleSend} />
+        <ChatWindow
+          messages={messages}
+          loading={sending}
+          model={model}
+          onModelChange={setModel}
+          onSend={handleSend}
+        />
       </main>
     </div>
   )
