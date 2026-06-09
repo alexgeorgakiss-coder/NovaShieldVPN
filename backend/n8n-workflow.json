@@ -1,0 +1,254 @@
+{
+  "name": "STEM Robotics - AI Content & Social Media",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stem-robotics-content",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-160, 300],
+      "webhookId": "stem-robotics-content"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.model }}",
+                    "rightValue": "dall-e-3",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "image"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.model }}",
+                    "rightValue": "gpt-4o",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra", "renameFallbackOutput": "text" }
+      },
+      "id": "node-switch-model",
+      "name": "Switch on Model",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [80, 300]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": { "__rl": true, "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "__rl": true, "value": "SEO Keywords", "mode": "name" },
+        "options": {}
+      },
+      "id": "node-airtable-seo",
+      "name": "Airtable - Read SEO",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [320, 200],
+      "credentials": {
+        "airtableTokenApi": { "id": "YOUR_AIRTABLE_CRED_ID", "name": "Airtable account" }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.message }}",
+        "options": {
+          "systemMessage": "Είσαι ο AI Content Strategist της ακαδημίας STEM Robotics (STEM/Ρομποτική για παιδιά).\n\nΔΕΔΟΜΕΝΑ SEO (από Airtable, χρησιμοποίησέ τα): {{ $('Airtable - Read SEO').all().map(r => JSON.stringify(r.json.fields)).join(' | ') }}\n\nΠΑΡΑΓΕΙΣ ΑΥΣΤΗΡΑ ΕΝΑ JSON OBJECT με ΑΚΡΙΒΩΣ αυτά τα πεδία:\n{\n  \"html\": \"<h1>...</h1><p>...</p>...\",\n  \"message\": \"σύντομο φιλικό μήνυμα προς τον χρήστη στα ελληνικά\",\n  \"seo_title\": \"...\",\n  \"meta_description\": \"... (max 160 χαρακτήρες)\",\n  \"seo_keywords\": \"keyword1, keyword2, keyword3\",\n  \"slug\": \"english-url-slug\"\n}\n\nΚΑΝΟΝΕΣ ΚΕΙΜΕΝΟΥ:\n- Άρθρα >1000 λέξεις.\n- ΜΟΝΟ HTML: χρησιμοποίησε <h2>, <h3>, <p>, <table><thead><tbody> για πίνακες, <ul><li>.\n- ΑΠΑΓΟΡΕΥΟΝΤΑΙ markdown σύμβολα (#, *, **, -).\n- Ενσωμάτωσε το brand name ως <span class=\\\"brand-highlight\\\">STEM Robotics</span>.\n- Πρόσθεσε στο τέλος ένα CTA: <div class=\\\"cta-section\\\">...</div>.\n- Το slug ΠΑΝΤΑ στα αγγλικά, lowercase, με παύλες.\n\nΕπίστρεψε ΜΟΝΟ το JSON, χωρίς ```json fences."
+        }
+      },
+      "id": "node-ai-agent",
+      "name": "AI Agent (gpt-4o)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [560, 200]
+    },
+    {
+      "parameters": {
+        "model": { "__rl": true, "value": "gpt-4o", "mode": "list" },
+        "options": { "temperature": 0.7, "responseFormat": "json_object" }
+      },
+      "id": "node-openai-chat",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [480, 420],
+      "credentials": {
+        "openAiApi": { "id": "YOUR_OPENAI_CRED_ID", "name": "OpenAi account" }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.chat_id }}",
+        "contextWindowLength": 10
+      },
+      "id": "node-memory",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [620, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Απομονώνει το καθαρό JSON, διαγράφει διπλά H2, εξάγει SEO\nconst raw = $input.first().json.output ?? $input.first().json.text ?? '';\n\nlet data;\ntry {\n  const cleaned = String(raw).replace(/```json|```/g, '').trim();\n  data = JSON.parse(cleaned);\n} catch (e) {\n  data = { html: String(raw), message: 'Δημιουργήθηκε το περιεχόμενο.', seo_title: '', meta_description: '', seo_keywords: '', slug: 'stem-robotics-article' };\n}\n\n// Καθάρισε διπλά H2 με ίδιο κείμενο\nconst seen = new Set();\ndata.html = (data.html || '').replace(/<h2[^>]*>(.*?)<\\/h2>/gi, (match, inner) => {\n  const key = inner.trim().toLowerCase();\n  if (seen.has(key)) return '';\n  seen.add(key);\n  return match;\n});\n\nreturn [{ json: data }];"
+      },
+      "id": "node-parser",
+      "name": "JS Parser - Clean HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"dall-e-3\",\n  \"prompt\": \"Professional 3D render for a STEM robotics academy article about: {{ $json.seo_title || $('Webhook').item.json.body.message }}. Clean studio lighting, modern educational robotics, vibrant. STRICTLY NO people, NO text, NO letters, NO watermarks, NO logos.\",\n  \"n\": 1,\n  \"size\": \"1024x1024\",\n  \"quality\": \"standard\"\n}",
+        "options": {}
+      },
+      "id": "node-dalle",
+      "name": "DALL-E 3 - Generate Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 200],
+      "credentials": {
+        "openAiApi": { "id": "YOUR_OPENAI_CRED_ID", "name": "OpenAi account" }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "post",
+        "operation": "create",
+        "title": "={{ $('JS Parser - Clean HTML').item.json.seo_title }}",
+        "additionalFields": {
+          "content": "={{ $('JS Parser - Clean HTML').item.json.html }}",
+          "slug": "={{ $('JS Parser - Clean HTML').item.json.slug }}",
+          "status": "publish"
+        }
+      },
+      "id": "node-wordpress",
+      "name": "WordPress - Publish",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [1280, 200],
+      "credentials": {
+        "wordpressApi": { "id": "YOUR_WORDPRESS_CRED_ID", "name": "Wordpress account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": { "__rl": true, "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "__rl": true, "value": "Chat History", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $('Webhook').item.json.body.chat_id }}",
+            "user_message": "={{ $('Webhook').item.json.body.message }}",
+            "ai_response": "={{ JSON.stringify($('JS Parser - Clean HTML').item.json) }}",
+            "wp_link": "={{ $('WordPress - Publish').item.json.link }}",
+            "timestamp": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "node-airtable-history",
+      "name": "Airtable - Write History",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1520, 200],
+      "credentials": {
+        "airtableTokenApi": { "id": "YOUR_AIRTABLE_CRED_ID", "name": "Airtable account" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": {{ JSON.stringify($('JS Parser - Clean HTML').item.json.message) }},\n  \"html\": {{ JSON.stringify($('JS Parser - Clean HTML').item.json.html) }},\n  \"wp_link\": {{ JSON.stringify($('WordPress - Publish').item.json.link) }},\n  \"seo_title\": {{ JSON.stringify($('JS Parser - Clean HTML').item.json.seo_title) }},\n  \"meta_description\": {{ JSON.stringify($('JS Parser - Clean HTML').item.json.meta_description) }},\n  \"seo_keywords\": {{ JSON.stringify($('JS Parser - Clean HTML').item.json.seo_keywords) }}\n}",
+        "options": {}
+      },
+      "id": "node-respond-text",
+      "name": "Respond - Article",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1760, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Η εικόνα δημιουργήθηκε με DALL·E 3.\",\n  \"image_url\": {{ JSON.stringify($json.data[0].url) }}\n}",
+        "options": {}
+      },
+      "id": "node-respond-image",
+      "name": "Respond - Image",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 460]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Switch on Model", "type": "main", "index": 0 }]]
+    },
+    "Switch on Model": {
+      "main": [
+        [{ "node": "DALL-E 3 - Generate Image", "type": "main", "index": 0 }],
+        [{ "node": "Airtable - Read SEO", "type": "main", "index": 0 }]
+      ]
+    },
+    "Airtable - Read SEO": {
+      "main": [[{ "node": "AI Agent (gpt-4o)", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent (gpt-4o)", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [[{ "node": "AI Agent (gpt-4o)", "type": "ai_memory", "index": 0 }]]
+    },
+    "AI Agent (gpt-4o)": {
+      "main": [[{ "node": "JS Parser - Clean HTML", "type": "main", "index": 0 }]]
+    },
+    "JS Parser - Clean HTML": {
+      "main": [[{ "node": "WordPress - Publish", "type": "main", "index": 0 }]]
+    },
+    "WordPress - Publish": {
+      "main": [[{ "node": "Airtable - Write History", "type": "main", "index": 0 }]]
+    },
+    "Airtable - Write History": {
+      "main": [[{ "node": "Respond - Article", "type": "main", "index": 0 }]]
+    },
+    "DALL-E 3 - Generate Image": {
+      "main": [[{ "node": "Respond - Image", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}
